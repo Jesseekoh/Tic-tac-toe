@@ -90,6 +90,7 @@ main {
 }
 
 footer {
+    width: 100%;
     position: absolute;
     bottom: 0;
     color: #1a1a1a;
@@ -97,4 +98,9 @@ footer {
 
 p {
     text-align: center;
+    color: #fff;
+}
+
+footer p a {
+    color: sandybrown;
 }
