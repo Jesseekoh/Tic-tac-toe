@@ -16,148 +16,98 @@ const app = () => {
     const tiles = document.querySelectorAll('.tile');
     const playerXCounter = document.querySelector('.player-1 span');
     const playerOCounter = document.querySelector('.player-2 span');
-    const scores = [0, 0]
-    const status = document.querySelector('.status');
+    const scoreSheet = [0, 0]
+    const gameStatus = document.querySelector('.status');
     const playAgainBtn = document.querySelector('.play-again');
     const resetBtn = document.querySelector('.reset');
     const board = [
-        "", "", "", "", "", "", "", "", ""
+        "", "", "",
+        "", "", "",
+        "", "", ""
     ];
 
     let currentPlayer = humanPlayer;
     let isGameActive = true;
-    let roundwon = false;
 
-/*
-    This checkBoardOld function is the previous checkboard function. I'm just keeping it around incase I encounter a bug sometime in the future
-*/
-    const checkBoardOld = () => {
-        const topLeft = board[0];
-        const topMiddle = board[1];
-        const topRight = board[2];
-        const midLeft = board[3];
-        const midMiddle = board[4];
-        const midRight = board[5];
-        const bottomLeft = board[6];
-        const bottomMiddle = board[7];
-        const bottomRight = board[8];
-        if (topLeft && topLeft === topMiddle && topLeft === topRight) {
-            isGameActive = false;
-            console.log(`${topLeft} wins this round`);
-            status.innerText = `${topLeft} wins`;
-            tiles[0].classList.add('win');
-            tiles[1].classList.add('win');
-            tiles[2].classList.add('win');
+    const checkWinner = () => {
+        let winner = null;
+        let winningIndex = null;
+
+        // horizontal
+        if (board[0] == board[1] && board[1] == board[2] && board[0] != "") {
+            winner = board[0];
+            winningIndex = 0;
         }
-        if (midLeft && midLeft === midMiddle && midLeft === midRight) {
-            isGameActive = false
-            console.log(`${midLeft} wins this round`)
-            status.innerText = `${midLeft} wins`;
-            tiles[3].classList.add('win');
-            tiles[4].classList.add('win');
-            tiles[5].classList.add('win');
+        if (board[3] == board[4] && board[4] == board[5] && board[3] != "") {
+            winner = board[3];
+            winningIndex = 1;
         }
-        if (bottomLeft && bottomLeft === bottomMiddle && bottomLeft === bottomRight) {
-            isGameActive = false;
-            console.log(`${bottomLeft} wins this round`);
-            status.innerText = `${bottomLeft} wins`;
-            tiles[6].classList.add('win');
-            tiles[7].classList.add('win');
-            tiles[8].classList.add('win');
+        if (board[6] == board[7] && board[7] == board[8] && board[6] != "") {
+            winner = board[6];
+            winningIndex = 2;
         }
-        if (topLeft && topLeft === midLeft && topLeft === bottomLeft) {
-            isGameActive = false;
-            console.log(`${topLeft} wins this round`);
-            status.innerText = `${topLeft} wins`;
-            tiles[0].classList.add('win');
-            tiles[3].classList.add('win');
-            tiles[6].classList.add('win');
+
+        // Vertical
+        if (board[0] == board[3] && board[3] == board[6] && board[0] != "") {
+            winner = board[0];
+            winningIndex = 5;
         }
-        if (topMiddle && topMiddle === midMiddle && topMiddle === bottomMiddle) {
-            isGameActive = false;
-            console.log(`${topMiddle} wins this round`);
-            status.innerText = `${topMiddle} wins`;
-            tiles[1].classList.add('win');
-            tiles[4].classList.add('win');
-            tiles[7].classList.add('win');
+        if (board[1] == board[4] && board[4] == board[7] && board[1] != "") {
+            winner = board[1];
+            winningIndex = 6;
         }
-        if (topRight && topRight === midRight && topRight === bottomRight) {
-            isGameActive = false;
-            console.log(`${topRight} wins this round`);
-            status.innerText = `${topRight} wins`;
-            tiles[2].classList.add('win');
-            tiles[5].classList.add('win');
-            tiles[8].classList.add('win');
+        if (board[2] == board[5] && board[5] == board[8] && board[2] != "") {
+            winner = board[2];
+            winningIndex = 7;
         }
-        if (topLeft && topLeft === midMiddle && topLeft === bottomRight) {
-            isGameActive = false;
-            console.log(`${topLeft} wins this round`);
-            status.innerText = `${topLeft} wins`;
-            tiles[0].classList.add('win');
-            tiles[4].classList.add('win');
-            tiles[8].classList.add('win');
+
+        // Diagonal
+        if (board[0] == board[4] && board[4] == board[8] && board[0] != "") {
+            winner = board[0];
+            winningIndex = 3;
         }
-        if (topRight && topRight === midMiddle && topRight === bottomLeft) {
-            isGameActive = false;
-            console.log(`${topRight} wins this round`);
-            status.innerText = `${topRight} wins`;
-            tiles[2].classList.add('win');
-            tiles[4].classList.add('win');
-            tiles[6].classList.add('win');
+        if (board[2] == board[4] && board[4] == board[6] && board[2] != "") {
+            winner = board[2];
+            winningIndex = 4;
         }
-        if (topLeft && topMiddle && topRight && midLeft && midMiddle && midRight && bottomLeft && bottomMiddle && bottomRight) {
-            isGameActive = false;
-            // alert(`It's a tie`)
-            status.innerText = "its a tie"
-        }
-    }
-    const handleWin = (gameWon) => {
-        isGameActive = false;
-        // console.log(winningCombinations[gameWon.index][0])
-        status.innerText = `${currentPlayer} wins this round`
-        winningCombinations[gameWon.index].forEach((item) => {
-            tiles[item].classList.add('win')
-        })
-        if (board[winningCombinations[gameWon.index][0]] === "X") {
-            scores[0]++;
-            playerXCounter.innerText = scores[0]
+
+        if (winner == null && !board.includes("")) {
+            winner = "tie";
+            return {
+                winner,
+            };
         } else {
-            scores[1]++;
-            playerOCounter.innerText = scores[1]
+            return {
+                winner,
+                winningIndex,
+            };
         }
-    }
-    const checkBoard = () => {
-        let gameWon = null;
-        for (let [index, win] of winningCombinations.entries()) {
-            if (board[win[0]] === '' || board[win[0]] === '' || board[win[0]] === '') {
-                continue
-            }
-            if (board[win[0]] === board[win[1]] && board[win[0]] === board[win[2]]) {
-                gameWon = {
-                    'index': index,
-                    'player': currentPlayer
-                };
-                handleWin(gameWon)
-                // gameWon = true;
-                // console.log(tiles[win[0]])
-                break
-            } else if (!board.includes("")) {
-                isGameActive = false;
-                // alert(`It's a tie`)
-                status.innerText = "It's a tie";
-            }
-        }
-        if (gameWon) {
-            // isGameActive = false;
-        }
-        return gameWon
-    }
+    };
 
-    const gameOver = (gameWon) => {
-        for (let index of winningCombinations[gameWon.index]) {
-            console.log('hello')
+    const handleWinner = (checkWinner) => {
+        if (checkWinner.winner === "X" || checkWinner.winner === "O") {
+            isGameActive = false;
+            gameStatus.innerText = `${checkWinner.winner} wins this round`;
+            winningCombinations[checkWinner.winningIndex].forEach((item) => {
+                tiles[item].classList.add("win");
+            });
+            if (checkWinner.winner === "X") {
+                scoreSheet[0]++;
+                playerXCounter.innerText = scoreSheet[0];
+            } else {
+                scoreSheet[1]++;
+                playerOCounter.innerText = scoreSheet[1];
+            }
+        } else if (checkWinner.winner === "tie") {
+            isGameActive = false;
+            gameStatus.innerText = "It's a tie";
         }
-    }
+        if (checkWinner === null) {
+            return;
+        }
+    };
+
+
 
     const changePlayer = () => {
         if (currentPlayer === humanPlayer) {
@@ -181,14 +131,55 @@ const app = () => {
         if (isValidMove(tile) && isGameActive) {
             board[index] = currentPlayer;
             tile.innerText = board[index];
-            checkBoard();
+            checkWinner();
+            handleWinner(checkWinner());
             if (isGameActive) {
-
                 changePlayer();
-
                 computerMove();
             }
-        };
+        }
+    };
+
+    const minimax = (board, depth, isMaximizing) => {
+        let result = checkWinner();
+        // if (result.winner !== null) {
+        //     let score = scores[result.winner]
+        //     return score;
+        // }
+
+        if (result.winner == "X") {
+            return 10;
+        } else if (result.winner == "O") {
+            return -10;
+        } else if (result.winner == "tie") {
+            return 0;
+        }
+
+        if (isMaximizing) {
+            let bestScore = -Infinity;
+            for (let i in board) {
+                // See is slot is empty
+                if (board[i] == "") {
+                    board[i] = humanPlayer;
+                    let score = minimax(board, depth + 1, false);
+                    board[i] = "";
+                    bestScore = Math.max(score, bestScore);
+                }
+            }
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            for (let i in board) {
+                // See is slot is empty
+                if (board[i] == "") {
+                    board[i] = computer;
+                    let score = minimax(board, depth + 1, true);
+                    board[i] = "";
+                    bestScore = Math.min(score, bestScore);
+                }
+            }
+            return bestScore;
+        }
     };
 
     const emptyCells = () => {
@@ -200,25 +191,36 @@ const app = () => {
         })
         return cells;
     }
-    const bestspot = () => {
-        return emptyCells()[0]
-    }
+    const bestSpot = (board) => {
+        let bestVal = Infinity;
+        let bestMove;
+        for (let i in board) {
+            if (board[i] == "") {
+                board[i] = computer;
+                let moveVal = minimax(board, 0, true); // 10, -10, 0
+                board[i] = "";
+                if (moveVal < bestVal) {
+                    bestVal = moveVal;
+                    bestMove = i;
+                }
+            }
+        }
+        return bestMove;
+    };
 
     const computerMove = () => {
-        // if (emptyCells().length !== 0) {
-        // console.log('black')
-        // console.log(emptyCells().length)
         setTimeout(() => {
-            const move = emptyCells()[Math.floor(Math.random() * emptyCells().length)];
-            board[move] = currentPlayer;
-            tiles[move].innerText = currentPlayer;
-            checkBoard();
+            // const move = emptyCells()[Math.floor(Math.random() * emptyCells().length)];
+            const move = bestSpot(board);
+            board[move] = computer;
+            tiles[move].innerText = computer;
+            checkWinner();
+            handleWinner(checkWinner());
             if (isGameActive) {
                 changePlayer();
             }
 
         }, 300);
-
 
         // }
     }
@@ -232,36 +234,36 @@ const app = () => {
         });
     });
 
-    resetBtn.addEventListener('click', () => {
+    resetBtn.addEventListener("click", () => {
         isGameActive = true;
         currentPlayer = humanPlayer;
 
         tiles.forEach((tile) => {
             tile.innerText = "";
-            tile.classList.remove('win');
-        })
-        board.forEach((element, index) => {
-            board[index] = ''
-        });
-        status.innerHTML = `It's ${currentPlayer}'s turn`;
-        scores[0] = 0;
-        scores[1] = 0;
-        playerXCounter.innerText = 0;
-        playerOCounter.innerText = 0;
-    })
-
-    playAgainBtn.addEventListener('click', () => {
-        isGameActive = true;
-        currentPlayer = humanPlayer;
-        tiles.forEach((tile) => {
-            tile.innerText = "";
-            tile.classList.remove('win')
+            tile.classList.remove("win");
         });
         board.forEach((element, index) => {
             board[index] = "";
         });
-        status.innerHTML = `It's ${currentPlayer}'s turn`;
-    })
+        gameStatus.innerHTML = `It's ${currentPlayer}'s turn`;
+        scoreSheet[0] = 0;
+        scoreSheet[1] = 0;
+        playerXCounter.innerText = 0;
+        playerOCounter.innerText = 0;
+    });
+
+    playAgainBtn.addEventListener("click", () => {
+        isGameActive = true;
+        currentPlayer = humanPlayer;
+        tiles.forEach((tile) => {
+            tile.innerText = "";
+            tile.classList.remove("win");
+        });
+        board.forEach((element, index) => {
+            board[index] = "";
+        });
+        gameStatus.innerHTML = `It's ${currentPlayer}'s turn`;
+    });
 
 
 
